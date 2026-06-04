@@ -1,0 +1,76 @@
+# MagicSquare_xx — Cursor Rule (헌법)
+
+프로젝트: **4×4 부분 마방진**(빈칸 2개) · **ECB** · **Dual-Track TDD**
+SSOT: `docs/PRD.md` > `Report/*` > 본 Rule (충돌 시 PRD 우선)
+
+---
+
+## 1. 도메인
+
+- 격자 **4×4**, 셀 값 `0`(빈칸) 또는 **1~16**, 빈칸(`0`) **정확히 2개**, 1~16 **중복 없음**
+- **10선** = 행 4 + 열 4 + `\`(주대각) + `/`(반대 대각), 각 합 = **마방진 상수 34**
+- 성공 출력: **`int[6]`** `[r1, c1, n1, r2, c2, n2]` — 좌표 **1-index**(1~4), row-major
+- 실패 출력: **에러 코드 + 깨진 줄 식별**(SC-2) — Mom Test: 행·열만 검증하고 대각선 누락 금지
+
+### MagicConstant SSOT
+- `34`, `16`, `4`(격자 크기)는 **`entity.constants`**(또는 동등 SSOT)에서만 정의
+- 테스트·구현에 `34`/`16` **리터럴 산재 금지** — SSOT import 사용
+
+### 오류 코드 (boundary 최종 반환)
+
+| 코드 | 의미 | 담당 |
+|------|------|------|
+| E001 | 격자 크기 ≠ 4×4 | boundary |
+| E002 | 빈칸 개수 ≠ 2 | boundary |
+| E003 | None / 범위(1~16) / 중복 위반 | boundary |
+| E004 | 특정 줄 합 ≠ 34 (줄 종류·인덱스) | boundary |
+| E005 | 입·출력 계약 위반 (`int[6]` 형식·1-index) | boundary |
+| E006 | 해 없음 / 풀이 불가 | entity 결과 → boundary 매핑 |
+| E007 | 해 다중 / 모호 | entity 결과 → boundary 매핑 |
+
+- **entity는 E001~E005를 raise·return·emit하지 않는다** — 10선 판정·풀이 **로직**만 수행
+- 입력 검증·에러 코드 부여는 **boundary/control** 책임
+
+---
+
+## 2. 아키텍처 (ECB)
+
+```
+boundary → control → entity
+```
+
+| Layer | 경로 | 역할 |
+|-------|------|------|
+| boundary | `src/boundary/` | I/O, 입력 검증, E001~E007 반환 |
+| control | `src/control/` | 흐름 조율, entity 호출, 결과 매핑 |
+| entity | `src/entity/` | 순수 도메인 — 10선 판정·빈칸·풀이 |
+
+- **import 방향:** boundary→control→entity 만 허용
+- **entity → control / entity → boundary import 금지** (entity 간 import는 동일 layer만)
+
+## 3. Dual-Track TDD
+
+| Track | Layer | 테스트 ID | 파일명 | Mock |
+|-------|-------|-----------|--------|------|
+| Logic | entity, control | `D-*` | `tests/*/test_d_*.py` | **Domain Mock 금지** |
+| UI | boundary | `U-*` | `tests/*/test_u_*.py` | Mock **허용** |
+
+- C2C: PRD FR → Test ID → pytest 파일 1:1 추적
+- Logic Track에서 `@patch`·Mock으로 entity/control **대체 금지**
+
+---
+
+## 4. TDD 게이트
+
+- 사이클: **RED → GREEN → REFACTOR** (순서 준수)
+- RED: `tests/`만 수정, `pytest` **FAIL** 확인 후 GREEN
+- GREEN: 최소 구현으로 FAIL → PASS
+- **금지:** `pytest.skip`, `pytest.mark.xfail`, assert 완화·삭제, 통과용 더미 assert
+- RED 스켈레톤 Then: `pytest.fail("RED: {TestID} — …")` 허용 (의도적 FAIL)
+
+## 5. AI 행동
+
+- **한국어**로 응답
+- TDD 작업 시 **첫 줄에 선언:** `Phase: red|green|refactor | Layer: entity|control|boundary | Track: Logic|UI`
+- **git commit / push는 사용자 명시 요청 시에만** 수행
+- 범위 밖(3×3·5×5, PyQt 완성 앱, 마방진 자동 생성) 제안·구현 금지
