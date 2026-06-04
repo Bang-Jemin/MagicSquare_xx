@@ -11,6 +11,7 @@
 | `tests/conftest.py` 픽스처 G0/G1 | ✅ |
 | Boundary RED (`U-*`) | ⬜ |
 | Logic RED (`D-*`) | ⏳ (D-LOC-01 RED 완료) |
+| Logic GREEN / Golden Master | ✅ (D-LOC-01 — [GOLDEN-MASTER.md](GOLDEN-MASTER.md)) |
 
 ---
 
@@ -34,7 +35,7 @@
 
 - [x] **FIX-01** `grid_g0` 픽스처 — 완전 마방진 (G0)
 - [x] **FIX-02** `grid_g1` 픽스처 — 빈칸 (2,2)·(3,3) **1-index**, 미존재 수 `[7, 10]` (G1)
-- [ ] **FIX-03** 마방진 상수 `34`는 `entity.constants` SSOT import (리터럴 산재 금지)
+- [x] **FIX-03** `entity.constants` SSOT 생성 (`34`/`16`/`4` 등) — D-LOC-01 GREEN; D-VAL 테스트 import는 후속
 
 ---
 
@@ -91,7 +92,7 @@
 
 † PRD SSOT에서는 10선을 아래 **D-VAL-01~05**로 분리한다.
 
-- [x] **D-LOC-01** — `tests/entity/test_d_loc_01.py` → FAIL (`pytest.fail` RED 확인)
+- [x] **D-LOC-01** — RED: `pytest.fail` FAIL 확인 → **GREEN PASS** (`assert [(2,2),(3,3)]`) · Golden Master ✅
 - [ ] **D-MIS-01** — `tests/entity/test_d_mis_01.py` → FAIL (`ImportError` / `AssertionError`)
 - [ ] **D-SOL-01** — `tests/entity/test_d_sol_01.py` → FAIL (`pytest.fail()` RED)
 
@@ -154,7 +155,20 @@ python -m pytest tests/entity/ tests/boundary/ -v
 
 ---
 
-## 다음 Phase (본 To-Do 완료 후)
+## GREEN PASS · Golden Master
 
-- [ ] **GREEN** — 대상 Test ID 1개씩 `src/` 최소 구현 → PASS
-- [ ] **REFACTOR** — 전체 `pytest` PASS 유지하며 구조 정리
+> SSOT: [GOLDEN-MASTER.md](GOLDEN-MASTER.md)
+
+| Test ID | `src/` | pytest | Golden Master (Then) |
+|---------|--------|--------|----------------------|
+| **D-LOC-01** | `entity/loc.py`, `constants.py` | ✅ PASS | `[(2, 2), (3, 3)]` on G1 |
+
+```bash
+python -m pytest tests/entity/test_d_loc_01.py -v
+```
+
+## 다음 Phase
+
+- [x] **GREEN (D-LOC-01)** — `find_blank_coords` 최소 구현 → PASS
+- [ ] **GREEN** — D-VAL-03 등 다음 Test ID
+- [ ] **REFACTOR** — D-LOC-01 Golden Master 유지하며 구조 정리

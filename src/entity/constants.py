@@ -1,0 +1,7 @@
+"""마방진·격자 SSOT — 리터럴 산재 금지."""
+
+GRID_SIZE = 4
+MAGIC_SUM = 34
+CELL_MAX = 16
+BLANK_CELL = 0
+COORD_INDEX_BASE = 1

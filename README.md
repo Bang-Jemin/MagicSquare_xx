@@ -74,8 +74,14 @@ MagicSquare_xx/
 |------|------|
 | [docs/PRD.md](docs/PRD.md) | PRD — FR·에러 코드·C2C·성공 기준 |
 | [docs/TDD-RED-TODO.md](docs/TDD-RED-TODO.md) | TDD RED 체크리스트 (Boundary `U-*` · Logic `D-*`) |
+| [docs/GOLDEN-MASTER.md](docs/GOLDEN-MASTER.md) | GREEN PASS Golden Master (Given·When·Then SSOT) |
 | [Report/01](Report/01.MagicSquare_ProblemDefinition_Report.md) | Mom Test · R-G-I-O · 세션 3 · 범위 |
+| [Report/03](Report/03.MagicSquare_Session4_D-LOC-01_RED_Report.md) | 세션 4 — D-LOC-01 RED · `origin/red` |
+| [Report/04](Report/04.MagicSquare_Session4_D-LOC-01_GREEN_Report.md) | 세션 4 — D-LOC-01 GREEN PASS · Golden Master |
+| [Report/05](Report/05.MagicSquare_Session5_D-SOL-01_GoldenMaster_Report.md) | 세션 5 — D-SOL-01 Approval Golden Master |
 | [Prompting/01](Prompting/01.MagicSquare_ProblemDefinition_Report-Promt.md) | STEP 1 Mom Test 인터뷰 Transcript |
+| [Prompting/03](Prompting/03.MagicSquare_Session4_D-LOC-01_Transcript.md) | 세션 4 D-LOC-01 Export Transcript |
+| [Prompting/05](Prompting/05.MagicSquare_Session5_D-SOL-01_Transcript.md) | 세션 5 D-SOL-01 Golden Master Export Transcript |
 
 ## 범위
 
@@ -101,6 +107,7 @@ MagicSquare_xx/
 | Harness (`pyproject.toml`, `tests/` 골격) | ✅ |
 | `tests/conftest.py` 픽스처 G0/G1 | ✅ |
 | Logic RED (`D-*`) | ⏳ (D-LOC-01 RED 완료) |
+| Logic GREEN / Golden Master (`D-*`) | ✅ (D-LOC-01 PASS) |
 | Boundary RED (`U-*`) | ⬜ |
 
 ### 공통 — RED 게이트
@@ -119,7 +126,7 @@ MagicSquare_xx/
 
 - [x] **FIX-01** `grid_g0` 픽스처 (G0)
 - [x] **FIX-02** `grid_g1` 픽스처 (G1) — 미존재 수 `[7, 10]`
-- [ ] **FIX-03** 마방진 상수 `34` — `entity.constants` SSOT import (리터럴 산재 금지)
+- [x] **FIX-03** 마방진 상수 `34` — `entity.constants` SSOT 생성 *(D-LOC-01 GREEN; D-VAL 테스트 연동은 후속)*
 
 ### Logic Track — `tests/entity/test_d_*.py` *(권장 순서)*
 
@@ -128,7 +135,7 @@ MagicSquare_xx/
 - [ ] **D-VAL-05** `validate_all_lines()` — G0 → 10선 전부 34 (SC-1)
 - [ ] **D-VAL-01** `validate_rows()` — G0 → 행 4개 합 = 34
 - [ ] **D-VAL-02** `validate_cols()` — G0 → 열 4개 합 = 34
-- [x] **D-LOC-01** `find_blank_coords()` — G1 → `[(2,2),(3,3)]` *(RED 스켈레톤·pytest FAIL 확인)*
+- [x] **D-LOC-01** `find_blank_coords()` — G1 → `[(2,2),(3,3)]` *(RED FAIL → **GREEN PASS** · [Golden Master](docs/GOLDEN-MASTER.md))*
 - [ ] **D-SOL-01** `solve_blanks()` — G1 Step A 성공
 - [ ] **D-MIS-01** `find_not_exist_nums()` — G1 → `[7, 10]` 오름차순
 
@@ -149,10 +156,16 @@ MagicSquare_xx/
 - [ ] **U-FLOW-01** 유효 G1 → boundary → control → entity 호출 순
 - [ ] **U-FLOW-02** `grid=None` → `execute()` 0회 (조기 종료)
 
-### RED 확인용 pytest
+### GREEN PASS 확인용 pytest (D-LOC-01 Golden Master)
 
 ```bash
 python -m pytest tests/entity/test_d_loc_01.py::test_d_loc_01_blank_coords_row_major -v
+python -m pytest tests/entity/test_d_loc_01.py -v
+```
+
+### RED 확인용 pytest (미작성 항목)
+
+```bash
 python -m pytest tests/entity/test_d_val_03.py -v
 python -m pytest tests/boundary/test_u_in_01.py -v
 python -m pytest tests/entity/ tests/boundary/ -v
@@ -167,7 +180,8 @@ python -m pytest tests/entity/ tests/boundary/ -v
 | `.cursorrules` · Skill · `/tdd-red` | ✅ |
 | `pyproject.toml` · pytest harness | ✅ |
 | RED 테스트 (`tests/` · 위 체크리스트) | ⏳ (D-LOC-01 완료) |
-| `src/` GREEN 구현 | ⬜ |
+| `src/` GREEN 구현 | ✅ (D-LOC-01 · `find_blank_coords`) |
+| Golden Master ([docs/GOLDEN-MASTER.md](docs/GOLDEN-MASTER.md)) | ✅ (D-LOC-01) |
 | PyQt UI | ❌ (범위 외) |
 
 ## 관련 프로젝트
