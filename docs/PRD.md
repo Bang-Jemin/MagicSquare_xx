@@ -1,6 +1,7 @@
 # PRD — MagicSquare_xx (4×4 부분 마방진)
 
-> Report: [Report/01.MagicSquare_ProblemDefinition_Report.md](../Report/01.MagicSquare_ProblemDefinition_Report.md)
+> Report: [Report/01.MagicSquare_ProblemDefinition_Report.md](../Report/01.MagicSquare_ProblemDefinition_Report.md)  
+> RED To-Do: [TDD-RED-TODO.md](TDD-RED-TODO.md)
 
 ## 1. 배경
 
