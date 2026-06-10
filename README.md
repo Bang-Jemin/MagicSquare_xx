@@ -57,14 +57,15 @@
 MagicSquare_xx/
 ├── README.md
 ├── docs/
-│   └── PRD.md                       # 기능 요구사항 · C2C · Mom Test
+│   ├── PRD.md
+│   └── TDD-RED-TODO.md              # RED 체크리스트 SSOT
 ├── Report/
 │   └── 01.MagicSquare_ProblemDefinition_Report.md
 ├── Prompting/
 │   └── 01.MagicSquare_ProblemDefinition_Report-Promt.md
-├── src/                             # ⏳ 예정 (entity / control / boundary)
-├── tests/                           # ⏳ 예정 (D-VAL-03~05 RED 우선)
-└── .cursor/                         # ⏳ 예정 (rules · commands · skills · hooks)
+├── src/                             # ⏳ GREEN부터 (entity / control / boundary)
+├── tests/                           # ⏳ RED — conftest · test_d_* · test_u_*
+└── .cursor/                         # rules · commands · skills
 ```
 
 ## 문서
@@ -72,6 +73,7 @@ MagicSquare_xx/
 | 문서 | 설명 |
 |------|------|
 | [docs/PRD.md](docs/PRD.md) | PRD — FR·에러 코드·C2C·성공 기준 |
+| [docs/TDD-RED-TODO.md](docs/TDD-RED-TODO.md) | TDD RED 체크리스트 (Boundary `U-*` · Logic `D-*`) |
 | [Report/01](Report/01.MagicSquare_ProblemDefinition_Report.md) | Mom Test · R-G-I-O · 세션 3 · 범위 |
 | [Prompting/01](Prompting/01.MagicSquare_ProblemDefinition_Report-Promt.md) | STEP 1 Mom Test 인터뷰 Transcript |
 
@@ -88,32 +90,86 @@ MagicSquare_xx/
 - ECB 분류·슬라이드 설계만으로 "문제 해결" 처리
 - "대충 맞는 것 같다" 수동 확인만으로 완료 처리
 
-## C2C 추적 (우선순위)
+## TDD RED 체크리스트
 
-| PRD | Test Case (RED) | Mom Test |
-|-----|-----------------|----------|
-| FR-VAL-03 | `validate_main_diagonal()` → 34 | 대각선 `\` 누락 재현 |
-| FR-VAL-04 | `validate_anti_diagonal()` → 34 | 대각선 `/` 누락 재현 |
-| FR-VAL-05 | `validate_all_lines()` → 10개 True | SC-1 |
-| FR-LOC-01 | `find_blank_coords()` → 2좌표 | — |
+> 상세 설계·표: [docs/TDD-RED-TODO.md](docs/TDD-RED-TODO.md) · RED는 **`tests/`만** 수정 · 각 항목마다 **`pytest` FAIL** 확인
 
-## 현재 상태 · 다음 단계
+### 진행 요약
+
+| 항목 | 상태 |
+|------|------|
+| Harness (`pyproject.toml`, `tests/` 골격) | ✅ |
+| `tests/conftest.py` 픽스처 G0/G1 | ✅ |
+| Logic RED (`D-*`) | ⏳ (D-LOC-01 RED 완료) |
+| Boundary RED (`U-*`) | ⬜ |
+
+### 공통 — RED 게이트
+
+- [ ] **RED-00** `Phase: red` 선언 후 `tests/`만 수정 (`src/` 금지)
+- [ ] **RED-01** `pytest` exit ≠ 0 확인 (`ImportError` / `AssertionError` / `pytest.fail("RED: …")` 허용)
+- [ ] **RED-02** Logic Track Domain Mock 금지 · UI Track Mock 허용
+- [ ] **RED-03** `pytest.skip` · `xfail` · assert 완화·통과용 더미 assert 금지
+
+### 선행 — Given 픽스처 (`tests/conftest.py`)
+
+| ID | 설명 |
+|----|------|
+| **G0** | 완전 마방진 `[[16,3,2,13],[5,10,11,8],[9,6,7,12],[4,15,14,1]]` |
+| **G1** | 부분 마방진 `[[16,3,2,13],[5,0,11,8],[9,6,0,12],[4,15,14,1]]` — 빈칸 (2,2)·(3,3) 1-index |
+
+- [x] **FIX-01** `grid_g0` 픽스처 (G0)
+- [x] **FIX-02** `grid_g1` 픽스처 (G1) — 미존재 수 `[7, 10]`
+- [ ] **FIX-03** 마방진 상수 `34` — `entity.constants` SSOT import (리터럴 산재 금지)
+
+### Logic Track — `tests/entity/test_d_*.py` *(권장 순서)*
+
+- [ ] **D-VAL-03** `validate_main_diagonal()` — G0 → `\` 합 = 34 · Mom Test **최우선**
+- [ ] **D-VAL-04** `validate_anti_diagonal()` — G0 → `/` 합 = 34
+- [ ] **D-VAL-05** `validate_all_lines()` — G0 → 10선 전부 34 (SC-1)
+- [ ] **D-VAL-01** `validate_rows()` — G0 → 행 4개 합 = 34
+- [ ] **D-VAL-02** `validate_cols()` — G0 → 열 4개 합 = 34
+- [x] **D-LOC-01** `find_blank_coords()` — G1 → `[(2,2),(3,3)]` *(RED 스켈레톤·pytest FAIL 확인)*
+- [ ] **D-SOL-01** `solve_blanks()` — G1 Step A 성공
+- [ ] **D-MIS-01** `find_not_exist_nums()` — G1 → `[7, 10]` 오름차순
+
+### Boundary / UI Track — `tests/boundary/test_u_*.py` *(우선: U-IN-01 → U-IN-02)*
+
+**입력 (U-IN)**
+
+- [ ] **U-IN-01** `grid=None` → `E003`
+- [ ] **U-IN-02** `grid=3×4` → `E001`
+- [ ] **U-IN-03** 빈칸 0개 → `E002`
+- [ ] **U-IN-04** 값 1~16 밖 → `E003`
+- [ ] **U-IN-05** 1~16 중복 → `E003`
+
+**출력·흐름 (U-OUT, U-FLOW)**
+
+- [ ] **U-OUT-01** 유효 G1 → `len(result)==6`, `[r1,c1,n1,r2,c2,n2]` 1-index
+- [ ] **U-OUT-02** 10선 중 1줄 ≠34 → `E004` + 깨진 줄 식별 (SC-2)
+- [ ] **U-FLOW-01** 유효 G1 → boundary → control → entity 호출 순
+- [ ] **U-FLOW-02** `grid=None` → `execute()` 0회 (조기 종료)
+
+### RED 확인용 pytest
+
+```bash
+python -m pytest tests/entity/test_d_loc_01.py::test_d_loc_01_blank_coords_row_major -v
+python -m pytest tests/entity/test_d_val_03.py -v
+python -m pytest tests/boundary/test_u_in_01.py -v
+python -m pytest tests/entity/ tests/boundary/ -v
+```
+
+## 현재 상태
 
 | 항목 | 상태 |
 |------|------|
 | Mom Test · 문제 정의 (Report 01) | ✅ |
-| PRD | ✅ |
-| `.cursorrules` · Skill · Command · Hook | ⏳ |
-| `pyproject.toml` · pytest harness | ⏳ |
-| `src/` · `tests/` (D-VAL RED) | ⏳ |
+| PRD · [TDD-RED-TODO](docs/TDD-RED-TODO.md) | ✅ |
+| `.cursorrules` · Skill · `/tdd-red` | ✅ |
+| `pyproject.toml` · pytest harness | ✅ |
+| RED 테스트 (`tests/` · 위 체크리스트) | ⏳ (D-LOC-01 완료) |
+| `src/` GREEN 구현 | ⬜ |
 | PyQt UI | ❌ (범위 외) |
-
-**다음 작업**
-
-1. `.cursorrules` — 4×4·10선=34·RED 우선 헌법
-2. `/tdd-red` — **D-VAL-03**(`\`) RED + pytest FAIL
-3. D-VAL-04~05 → SC-1~2 pytest로 증명
 
 ## 관련 프로젝트
 
-[MagicSquare_1004](../docs/CursorAI-main/src/MagicSquare_1004/) — 동일 도메인 · TDD·ECB 구현 참고 (선행 세션)
+[MagicSquare_xx](../docs/CursorAI-main/src/MagicSquare_xx/) — 동일 도메인 · TDD·ECB 구현 참고 (선행 세션)
